@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: zamutints-db
+    environment:
+      POSTGRES_USER: zamutints
+      POSTGRES_PASSWORD: zamutints_dev_password
+      POSTGRES_DB: zamutints
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zamutints"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: zamutints-server
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://zamutints:zamutints_dev_password@db:5432/zamutints
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      FRONTEND_URL: http://localhost:9001
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    ports:
+      - "9001:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: npm run dev
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: zamutints-client
+    environment:
+      VITE_API_URL: http://localhost:9001/api
+      VITE_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - "9002:5173"
+    depends_on:
+      - server
+    command: npm run dev
+
+volumes:
+  postgres_data:
