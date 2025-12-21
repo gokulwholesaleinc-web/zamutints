@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Zamutints Brand Colors */
+:root {
+  --zamu-cyan: #36B9EB;
+  --zamu-cyan-light: #62CAFA;
+  --zamu-cyan-dark: #2A9BC9;
+  --zamu-gray-dark: #1B1B1B;
+  --zamu-gray-medium: #919191;
+  --zamu-gray-light: #F7F7F7;
+}
+
 @layer base {
   body {
     @apply bg-black text-white antialiased;
@@ -20,29 +30,74 @@
   }
 
   .btn-primary {
-    @apply btn bg-zamu-cyan text-black hover:bg-zamu-cyan-light focus:ring-zamu-cyan;
+    @apply btn text-black;
+    background-color: var(--zamu-cyan);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--zamu-cyan-light);
+  }
+
+  .btn-primary:focus {
+    --tw-ring-color: var(--zamu-cyan);
   }
 
   .btn-secondary {
-    @apply btn bg-transparent text-white border border-zamu-gray-medium hover:border-zamu-cyan hover:text-zamu-cyan;
+    @apply btn bg-transparent text-white border;
+    border-color: var(--zamu-gray-medium);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--zamu-cyan);
+    color: var(--zamu-cyan);
   }
 
   .btn-outline {
-    @apply btn bg-transparent text-zamu-cyan border-2 border-zamu-cyan hover:bg-zamu-cyan hover:text-black;
+    @apply btn bg-transparent border-2;
+    color: var(--zamu-cyan);
+    border-color: var(--zamu-cyan);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--zamu-cyan);
+    color: black;
   }
 
   .input {
-    @apply w-full px-4 py-3 bg-white border border-zamu-gray-medium rounded text-black placeholder-zamu-gray-medium focus:outline-none focus:ring-2 focus:ring-zamu-cyan focus:border-transparent;
+    @apply w-full px-4 py-3 rounded text-black focus:outline-none focus:ring-2 focus:border-transparent;
+    background-color: white;
+    border: 1px solid var(--zamu-gray-medium);
     font-family: 'Old Standard TT', serif;
+  }
+
+  .input::placeholder {
+    color: var(--zamu-gray-medium);
+  }
+
+  .input:focus {
+    --tw-ring-color: var(--zamu-cyan);
   }
 
   .input-dark {
-    @apply w-full px-4 py-3 bg-zamu-gray-dark border border-zamu-gray-dark rounded text-white placeholder-zamu-gray-medium focus:outline-none focus:ring-2 focus:ring-zamu-cyan focus:border-transparent;
+    @apply w-full px-4 py-3 rounded text-white focus:outline-none focus:ring-2 focus:border-transparent;
+    background-color: var(--zamu-gray-dark);
+    border: 1px solid var(--zamu-gray-dark);
     font-family: 'Old Standard TT', serif;
   }
 
+  .input-dark::placeholder {
+    color: var(--zamu-gray-medium);
+  }
+
+  .input-dark:focus {
+    --tw-ring-color: var(--zamu-cyan);
+  }
+
   .card {
-    @apply bg-zamu-gray-dark border border-zamu-gray-dark rounded-lg p-6 shadow-zamu;
+    @apply rounded-lg p-6;
+    background-color: var(--zamu-gray-dark);
+    border: 1px solid var(--zamu-gray-dark);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 
   .section-title {
@@ -51,7 +106,8 @@
   }
 
   .section-subtitle {
-    @apply text-zamu-gray-medium text-lg mb-8;
+    @apply text-lg mb-8;
+    color: var(--zamu-gray-medium);
     font-family: 'Old Standard TT', serif;
   }
 
@@ -63,7 +119,7 @@
 
   /* Accent text */
   .accent-text {
-    @apply text-zamu-cyan;
+    color: var(--zamu-cyan);
   }
 
   /* Link styles */
@@ -77,14 +133,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-black;
+    background-color: black;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-zamu-gray-dark rounded;
+    @apply rounded;
+    background-color: var(--zamu-gray-dark);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zamu-gray-medium;
+    background-color: var(--zamu-gray-medium);
   }
 }
