@@ -104,7 +104,7 @@ router.get('/bookings', async (req, res) => {
 
 // Update booking status
 router.patch('/bookings/:id/status',
-  [body('status').isIn(['pending_deposit', 'confirmed', 'paid', 'completed', 'cancelled', 'no_show'])],
+  [body('status').isIn(['pending_deposit', 'confirmed', 'paid', 'checked_in', 'in_progress', 'completed', 'cancelled', 'no_show'])],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -163,8 +163,16 @@ router.get('/customers', async (req, res) => {
 
     const result = await pool.query(query, params);
 
+    // Get total count
+    let countQuery = 'SELECT COUNT(*) FROM customers c';
+    if (search) {
+      countQuery += ` WHERE c.email ILIKE $1 OR c.first_name ILIKE $1 OR c.last_name ILIKE $1 OR c.phone ILIKE $1`;
+    }
+    const countResult = await pool.query(countQuery, search ? [`%${search}%`] : []);
+
     res.json({
       customers: result.rows,
+      total: parseInt(countResult.rows[0].count),
       page: parseInt(page),
       limit: parseInt(limit)
     });

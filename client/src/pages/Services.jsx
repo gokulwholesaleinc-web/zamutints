@@ -51,7 +51,7 @@ function Services() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">SERVICES & PRICING</h1>
-          <p className="text-zamu-gray-medium text-xl font-serif">
+          <p style={{ color: '#919191' }} className="text-xl font-serif">
             Quality auto customization services with transparent pricing
           </p>
         </div>
@@ -62,11 +62,11 @@ function Services() {
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
-              className={`px-5 py-2 font-display text-sm font-semibold transition-colors border ${
-                activeCategory === category.id
-                  ? 'bg-zamu-cyan text-black border-zamu-cyan'
-                  : 'bg-transparent text-zamu-gray-medium border-zamu-gray-dark hover:border-zamu-cyan hover:text-zamu-cyan'
-              }`}
+              className="px-5 py-2 font-display text-sm font-semibold transition-colors border"
+              style={activeCategory === category.id
+                ? { backgroundColor: '#36B9EB', color: 'black', borderColor: '#36B9EB' }
+                : { backgroundColor: 'transparent', color: '#919191', borderColor: '#333' }
+              }
             >
               {category.name}
             </button>
@@ -76,15 +76,15 @@ function Services() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredServices.map((service) => (
-            <div key={service.id} className="bg-black border border-zamu-gray-dark p-6 hover:border-zamu-cyan transition-all group">
+            <div key={service.id} className="bg-black p-6 transition-all" style={{ border: '1px solid #333' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-display font-semibold text-white group-hover:text-zamu-cyan transition-colors">{service.name}</h3>
-                <span className="px-3 py-1 bg-zamu-cyan/10 text-zamu-cyan text-xs font-display capitalize">
+                <h3 className="text-xl font-display font-semibold text-white">{service.name}</h3>
+                <span className="px-3 py-1 text-xs font-display capitalize" style={{ backgroundColor: 'rgba(54, 185, 235, 0.1)', color: '#36B9EB' }}>
                   {service.category.replace('_', ' ')}
                 </span>
               </div>
 
-              <p className="text-zamu-gray-medium font-serif mb-4">{service.description}</p>
+              <p style={{ color: '#919191' }} className="font-serif mb-4">{service.description}</p>
 
               {/* Variants/Pricing */}
               {service.variants && service.variants.length > 0 ? (
@@ -92,22 +92,23 @@ function Services() {
                   {service.variants.map((variant) => (
                     <div
                       key={variant.id}
-                      className="flex items-center justify-between py-2 border-b border-zamu-gray-dark last:border-0"
+                      className="flex items-center justify-between py-2"
+                      style={{ borderBottom: '1px solid #333' }}
                     >
                       <div>
                         <p className="text-white font-serif text-sm">{variant.name}</p>
                         {variant.description && (
-                          <p className="text-zamu-gray-medium text-xs">{variant.description}</p>
+                          <p style={{ color: '#919191' }} className="text-xs">{variant.description}</p>
                         )}
                       </div>
-                      <span className="text-zamu-cyan font-display font-bold">
+                      <span style={{ color: '#36B9EB' }} className="font-display font-bold">
                         ${parseFloat(variant.price).toFixed(0)}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-2xl font-display font-bold text-zamu-cyan mb-6">
+                <p className="text-2xl font-display font-bold mb-6" style={{ color: '#36B9EB' }}>
                   From ${parseFloat(service.base_price).toFixed(0)}
                 </p>
               )}
@@ -130,10 +131,10 @@ function Services() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Carbon */}
-            <div className="border border-zamu-gray-dark p-8">
+            <div className="p-8" style={{ border: '1px solid #333' }}>
               <h3 className="text-2xl font-display font-bold text-white mb-2">Carbon Film</h3>
-              <p className="text-zamu-gray-medium font-serif mb-4">5-Year Warranty</p>
-              <p className="text-3xl font-display font-bold text-zamu-cyan mb-6">From $100</p>
+              <p style={{ color: '#919191' }} className="font-serif mb-4">5-Year Warranty</p>
+              <p className="text-3xl font-display font-bold mb-6" style={{ color: '#36B9EB' }}>From $100</p>
               <ul className="space-y-3 mb-8">
                 {[
                   'Heat Rejection',
@@ -141,25 +142,25 @@ function Services() {
                   'No Signal Interference',
                   'Matte Finish',
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-zamu-gray-medium font-serif">
-                    <Check className="w-5 h-5 text-zamu-cyan mr-3 flex-shrink-0" />
+                  <li key={i} className="flex items-center font-serif" style={{ color: '#919191' }}>
+                    <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#36B9EB' }} />
                     {feature}
                   </li>
                 ))}
               </ul>
-              <Link to="/book?service=1" className="block text-center py-4 border border-zamu-cyan text-zamu-cyan font-display font-semibold hover:bg-zamu-cyan hover:text-black transition-colors">
+              <Link to="/book?service=1" className="block text-center py-4 font-display font-semibold transition-colors" style={{ border: '1px solid #36B9EB', color: '#36B9EB' }}>
                 Select Carbon
               </Link>
             </div>
 
             {/* Ceramic */}
-            <div className="border-2 border-zamu-cyan p-8 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-zamu-cyan text-black text-xs font-display font-bold">
+            <div className="p-8 relative" style={{ border: '2px solid #36B9EB' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-display font-bold" style={{ backgroundColor: '#36B9EB', color: 'black' }}>
                 MOST POPULAR
               </div>
               <h3 className="text-2xl font-display font-bold text-white mb-2">Ceramic Film</h3>
-              <p className="text-zamu-gray-medium font-serif mb-4">Lifetime Warranty</p>
-              <p className="text-3xl font-display font-bold text-zamu-cyan mb-6">From $150</p>
+              <p style={{ color: '#919191' }} className="font-serif mb-4">Lifetime Warranty</p>
+              <p className="text-3xl font-display font-bold mb-6" style={{ color: '#36B9EB' }}>From $150</p>
               <ul className="space-y-3 mb-8">
                 {[
                   'Superior Heat Rejection',
@@ -168,13 +169,13 @@ function Services() {
                   'Crystal Clear Clarity',
                   'Best-in-Class Performance',
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center text-zamu-gray-medium font-serif">
-                    <Check className="w-5 h-5 text-zamu-cyan mr-3 flex-shrink-0" />
+                  <li key={i} className="flex items-center font-serif" style={{ color: '#919191' }}>
+                    <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#36B9EB' }} />
                     {feature}
                   </li>
                 ))}
               </ul>
-              <Link to="/book?service=2" className="block text-center py-4 bg-zamu-cyan text-black font-display font-semibold hover:bg-zamu-cyan-light transition-colors">
+              <Link to="/book?service=2" className="block text-center py-4 font-display font-semibold transition-colors" style={{ backgroundColor: '#36B9EB', color: 'black' }}>
                 Select Ceramic
               </Link>
             </div>
@@ -182,11 +183,11 @@ function Services() {
         </div>
 
         {/* CTA */}
-        <div className="mt-20 text-center py-16 bg-zamu-gray-dark border-t border-b border-zamu-gray-dark">
+        <div className="mt-20 text-center py-16" style={{ backgroundColor: '#1B1B1B', borderTop: '1px solid #333', borderBottom: '1px solid #333' }}>
           <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4">
             NOT SURE WHICH SERVICE IS RIGHT FOR YOU?
           </h2>
-          <p className="text-zamu-gray-medium font-serif mb-8 text-lg">
+          <p style={{ color: '#919191' }} className="font-serif mb-8 text-lg">
             Call us and we'll help you choose the best option for your vehicle.
           </p>
           <a href="tel:872-203-1857" className="btn-outline text-lg">

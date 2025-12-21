@@ -1,6 +1,6 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
-const app = require('../index');
+const { app } = require('../index');
 const { pool } = require('../db/pool');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';

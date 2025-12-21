@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 // Admin login
 router.post('/login',
   [
-    body('email').isEmail().normalizeEmail(),
+    body('email').notEmpty().trim(),  // Allow username without @ for development
     body('password').notEmpty()
   ],
   async (req, res) => {

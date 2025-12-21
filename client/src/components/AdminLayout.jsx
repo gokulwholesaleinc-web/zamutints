@@ -5,6 +5,10 @@ import {
   Users,
   Wrench,
   Settings,
+  BarChart3,
+  DollarSign,
+  Package,
+  Bell,
   LogOut,
   Menu,
   X
@@ -21,6 +25,10 @@ function AdminLayout({ children }) {
     { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
     { name: 'Customers', href: '/admin/customers', icon: Users },
     { name: 'Services', href: '/admin/services', icon: Wrench },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'Finance', href: '/admin/finance', icon: DollarSign },
+    { name: 'Inventory', href: '/admin/inventory', icon: Package },
+    { name: 'Notifications', href: '/admin/notifications', icon: Bell },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

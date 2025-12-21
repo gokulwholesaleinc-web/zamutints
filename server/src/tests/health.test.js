@@ -1,6 +1,5 @@
-const { describe, it, expect, afterAll } = require('vitest');
 const request = require('supertest');
-const app = require('../index');
+const { app } = require('../index');
 const { pool } = require('../db/pool');
 
 describe('Health API', () => {

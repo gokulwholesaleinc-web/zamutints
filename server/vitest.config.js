@@ -10,5 +10,9 @@ export default defineConfig({
     sequence: {
       shuffle: false,
     },
+    env: {
+      DATABASE_URL: 'postgresql://zamutints:zamutints_dev_password@localhost:5433/zamutints',
+      JWT_SECRET: 'test_jwt_secret_for_testing',
+    },
   },
 });

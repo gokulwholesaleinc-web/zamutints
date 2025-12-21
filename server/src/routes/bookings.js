@@ -9,8 +9,9 @@ router.get('/availability/:date', async (req, res) => {
     const { date } = req.params;
     const serviceVariantId = req.query.serviceVariantId;
 
-    // Get day of week (0-6)
-    const dayOfWeek = new Date(date).getDay();
+    // Get day of week (0-6) - parse date as local time to avoid timezone issues
+    const [year, month, day] = date.split('-').map(Number);
+    const dayOfWeek = new Date(year, month - 1, day).getDay();
 
     // Check if date is blocked
     const blockedCheck = await pool.query(

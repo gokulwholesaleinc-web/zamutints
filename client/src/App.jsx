@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Booking from './pages/Booking';
@@ -13,6 +14,10 @@ import AdminBookings from './pages/admin/AdminBookings';
 import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminServices from './pages/admin/AdminServices';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminFinance from './pages/admin/AdminFinance';
+import AdminInventory from './pages/admin/AdminInventory';
+import AdminNotifications from './pages/admin/AdminNotifications';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
@@ -20,6 +25,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 function App() {
   return (
     <Elements stripe={stripePromise}>
+      <ScrollToTop />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout />}>
@@ -38,6 +44,10 @@ function App() {
           <Route path="customers" element={<AdminCustomers />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="finance" element={<AdminFinance />} />
+          <Route path="inventory" element={<AdminInventory />} />
+          <Route path="notifications" element={<AdminNotifications />} />
         </Route>
       </Routes>
     </Elements>

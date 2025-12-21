@@ -164,6 +164,229 @@ async function initDatabase() {
       INSERT INTO business_settings (business_name, phone, city, state, instagram_url, deposit_amount)
       SELECT 'Zamu Tints', '872-203-1857', 'Chicago', 'IL', 'https://instagram.com/zamutints', 35.00
       WHERE NOT EXISTS (SELECT 1 FROM business_settings LIMIT 1);
+
+      -- Seed default admin user if empty (username: test1, password: test1)
+      INSERT INTO admin_users (email, password_hash, name, role)
+      SELECT 'test1', '$2a$10$V0.1FuEkZtzyK2J2.50UG.Fm/S9BfyH08moO2onfMK0j1nEGFfsue', 'Test Admin', 'super_admin'
+      WHERE NOT EXISTS (SELECT 1 FROM admin_users LIMIT 1);
+
+      -- Expenses table for tracking business expenses
+      CREATE TABLE IF NOT EXISTS expenses (
+        id SERIAL PRIMARY KEY,
+        category VARCHAR(100) NOT NULL,
+        description TEXT,
+        amount DECIMAL(10, 2) NOT NULL,
+        date DATE NOT NULL DEFAULT CURRENT_DATE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Cash drawer table for end of day reconciliation
+      CREATE TABLE IF NOT EXISTS cash_drawer (
+        id SERIAL PRIMARY KEY,
+        date DATE NOT NULL UNIQUE,
+        opening_balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        cash_in DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        cash_out DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        closing_balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        notes TEXT,
+        reconciled BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Customer vehicles table
+      CREATE TABLE IF NOT EXISTS customer_vehicles (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+        year INTEGER,
+        make VARCHAR(100),
+        model VARCHAR(100),
+        color VARCHAR(50),
+        license_plate VARCHAR(20),
+        vin VARCHAR(17),
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Customer notes table (internal CRM notes)
+      CREATE TABLE IF NOT EXISTS customer_notes (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+        note TEXT NOT NULL,
+        created_by INTEGER REFERENCES admin_users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Add vehicle_id to bookings if not exists
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                       WHERE table_name='bookings' AND column_name='vehicle_id') THEN
+          ALTER TABLE bookings ADD COLUMN vehicle_id INTEGER REFERENCES customer_vehicles(id);
+        END IF;
+      END $$;
+
+      -- Add booking tracking columns for daily operations
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                       WHERE table_name='bookings' AND column_name='check_in_time') THEN
+          ALTER TABLE bookings ADD COLUMN check_in_time TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                       WHERE table_name='bookings' AND column_name='started_at') THEN
+          ALTER TABLE bookings ADD COLUMN started_at TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                       WHERE table_name='bookings' AND column_name='completed_at') THEN
+          ALTER TABLE bookings ADD COLUMN completed_at TIMESTAMP;
+        END IF;
+      END $$;
+
+      -- Inventory items table
+      CREATE TABLE IF NOT EXISTS inventory_items (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        sku VARCHAR(100) UNIQUE,
+        quantity DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        unit VARCHAR(50) NOT NULL DEFAULT 'units',
+        cost_per_unit DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        reorder_level DECIMAL(10, 2) NOT NULL DEFAULT 0,
+        supplier VARCHAR(255),
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Inventory usage table (tracks usage per booking/job)
+      CREATE TABLE IF NOT EXISTS inventory_usage (
+        id SERIAL PRIMARY KEY,
+        item_id INTEGER REFERENCES inventory_items(id) ON DELETE CASCADE,
+        booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+        quantity_used DECIMAL(10, 2) NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Seed default inventory items if empty
+      INSERT INTO inventory_items (name, category, sku, quantity, unit, cost_per_unit, reorder_level, supplier, notes)
+      SELECT * FROM (VALUES
+        ('Carbon Film 20"', 'film', 'CF-20', 500.00, 'feet', 1.50, 100.00, 'Film Depot', 'Standard carbon tint film'),
+        ('Carbon Film 40"', 'film', 'CF-40', 300.00, 'feet', 2.50, 75.00, 'Film Depot', 'Wide carbon tint film'),
+        ('Ceramic Film 20"', 'film', 'CER-20', 400.00, 'feet', 3.00, 100.00, 'Film Depot', 'Premium ceramic tint film'),
+        ('Ceramic Film 40"', 'film', 'CER-40', 250.00, 'feet', 5.00, 75.00, 'Film Depot', 'Wide premium ceramic film'),
+        ('PPF Clear', 'ppf', 'PPF-CLR', 200.00, 'feet', 8.00, 50.00, 'XPEL Distributor', 'Clear paint protection film'),
+        ('PPF Matte', 'ppf', 'PPF-MAT', 100.00, 'feet', 10.00, 25.00, 'XPEL Distributor', 'Matte paint protection film'),
+        ('Squeegees', 'tools', 'SQ-001', 25.00, 'units', 5.00, 5.00, 'Amazon', 'Installation squeegees'),
+        ('Razor Blades', 'tools', 'RZ-100', 500.00, 'units', 0.10, 100.00, 'Local Hardware', 'Replacement razor blades'),
+        ('Heat Gun Tips', 'tools', 'HG-TIP', 10.00, 'units', 8.00, 3.00, 'Amazon', 'Heat gun replacement tips'),
+        ('Slip Solution', 'supplies', 'SS-GAL', 5.00, 'gallons', 15.00, 2.00, 'Film Depot', 'Mounting solution'),
+        ('Glass Cleaner', 'supplies', 'GC-GAL', 8.00, 'gallons', 12.00, 2.00, 'Local Hardware', 'Professional glass cleaner'),
+        ('Microfiber Towels', 'supplies', 'MF-12PK', 50.00, 'packs', 8.00, 10.00, 'Amazon', '12-pack microfiber towels'),
+        ('Vinyl Wrap - Black Gloss', 'wrap', 'VW-BG', 150.00, 'feet', 4.00, 30.00, 'Wrap Suppliers', 'Black gloss vinyl'),
+        ('Vinyl Wrap - Black Matte', 'wrap', 'VW-BM', 120.00, 'feet', 4.50, 30.00, 'Wrap Suppliers', 'Black matte vinyl'),
+        ('Headlight Tint Film', 'film', 'HLT-20', 100.00, 'feet', 3.50, 25.00, 'Film Depot', 'Headlight/taillight tint')
+      ) AS v(name, category, sku, quantity, unit, cost_per_unit, reorder_level, supplier, notes)
+      WHERE NOT EXISTS (SELECT 1 FROM inventory_items LIMIT 1);
+
+      -- Notification templates table
+      CREATE TABLE IF NOT EXISTS notification_templates (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) UNIQUE NOT NULL,
+        type VARCHAR(20) NOT NULL DEFAULT 'both', -- 'sms', 'email', 'both'
+        subject VARCHAR(255),
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Notification log table
+      CREATE TABLE IF NOT EXISTS notification_log (
+        id SERIAL PRIMARY KEY,
+        booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        type VARCHAR(20) NOT NULL, -- 'sms' or 'email'
+        recipient VARCHAR(255) NOT NULL,
+        message TEXT,
+        status VARCHAR(50) DEFAULT 'pending',
+        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Notification settings table
+      CREATE TABLE IF NOT EXISTS notification_settings (
+        id SERIAL PRIMARY KEY,
+        setting_key VARCHAR(100) UNIQUE NOT NULL,
+        setting_value VARCHAR(255),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Seed default notification templates if empty
+      INSERT INTO notification_templates (name, type, subject, content)
+      SELECT * FROM (VALUES
+        ('appointment_confirmation', 'both', 'Booking Confirmed - {{business_name}}',
+          'Hi {{first_name}},
+
+Your appointment has been confirmed!
+
+Service: {{service_name}} - {{variant_name}}
+Vehicle: {{vehicle}}
+Date: {{appointment_date}}
+Time: {{appointment_time}}
+
+Total: {{total_amount}}
+
+Please arrive 10 minutes early. If you need to reschedule, please call us at {{business_phone}}.
+
+Thank you for choosing {{business_name}}!'),
+        ('appointment_reminder', 'both', 'Reminder: Your Appointment Tomorrow - {{business_name}}',
+          'Hi {{first_name}},
+
+This is a friendly reminder about your appointment tomorrow!
+
+Service: {{service_name}} - {{variant_name}}
+Vehicle: {{vehicle}}
+Date: {{appointment_date}}
+Time: {{appointment_time}}
+
+Please remember to arrive 10 minutes early. If you need to reschedule, call us at {{business_phone}}.
+
+See you soon!
+{{business_name}}'),
+        ('service_complete', 'both', 'Your Service is Complete! - {{business_name}}',
+          'Hi {{first_name}},
+
+Great news! Your {{service_name}} service has been completed.
+
+Vehicle: {{vehicle}}
+
+Your car is ready for pickup. If you have any questions, please call us at {{business_phone}}.
+
+Thank you for choosing {{business_name}}!'),
+        ('review_request', 'both', 'How was your experience? - {{business_name}}',
+          'Hi {{first_name}},
+
+Thank you for choosing {{business_name}} for your {{service_name}} service!
+
+We hope you love the results. If you have a moment, we would really appreciate if you could leave us a review on Google or Instagram.
+
+Your feedback helps us improve and helps others find quality auto services.
+
+Thank you again!
+{{business_name}}
+{{business_phone}}')
+      ) AS v(name, type, subject, content)
+      WHERE NOT EXISTS (SELECT 1 FROM notification_templates LIMIT 1);
+
+      -- Seed default notification settings if empty
+      INSERT INTO notification_settings (setting_key, setting_value)
+      SELECT * FROM (VALUES
+        ('auto_confirmation', 'true'),
+        ('auto_reminder', 'true'),
+        ('auto_service_complete', 'true'),
+        ('auto_review_request', 'true'),
+        ('reminder_hours_before', '24')
+      ) AS v(setting_key, setting_value)
+      WHERE NOT EXISTS (SELECT 1 FROM notification_settings LIMIT 1);
     `);
 
     console.log('Database tables created/verified');

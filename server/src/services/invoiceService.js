@@ -25,11 +25,23 @@ function generateInvoiceNumber(bookingId) {
 
 /**
  * Formats a date object to a readable string
- * @param {Date} date
+ * @param {Date|string} date
  * @returns {string} Formatted date
  */
 function formatDate(date) {
-  return new Date(date).toLocaleDateString('en-US', {
+  // Handle string dates (YYYY-MM-DD) by treating them as local time
+  let dateObj;
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split('-').map(Number);
+    dateObj = new Date(year, month - 1, day);
+  } else {
+    dateObj = new Date(date);
+    // If it looks like midnight UTC, adjust to local interpretation
+    if (dateObj.getUTCHours() === 0 && dateObj.getUTCMinutes() === 0) {
+      dateObj = new Date(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate());
+    }
+  }
+  return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

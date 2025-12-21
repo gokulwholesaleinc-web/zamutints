@@ -11,6 +11,12 @@ const paymentsRoutes = require('./routes/payments');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const invoicesRoutes = require('./routes/invoices');
+const dashboardRoutes = require('./routes/dashboard');
+const analyticsRoutes = require('./routes/analytics');
+const financeRoutes = require('./routes/finance');
+const customersRoutes = require('./routes/customers');
+const inventoryRoutes = require('./routes/inventory');
+const notificationsRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,6 +51,12 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/invoices', invoicesRoutes);
+app.use('/api/admin/dashboard', dashboardRoutes);
+app.use('/api/admin/analytics', analyticsRoutes);
+app.use('/api/admin/finance', financeRoutes);
+app.use('/api/admin/customers', customersRoutes);
+app.use('/api/admin/inventory', inventoryRoutes);
+app.use('/api/admin/notifications', notificationsRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -67,6 +79,9 @@ async function start() {
   }
 }
 
-start();
+// Only start server when run directly (not during tests)
+if (require.main === module) {
+  start();
+}
 
-module.exports = app;
+module.exports = { app, start, initDatabase };
