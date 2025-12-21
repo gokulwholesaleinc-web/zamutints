@@ -34,31 +34,65 @@ function Home() {
     {
       title: 'Vinyl Wraps',
       description: 'Full or partial vehicle color change',
-      price: 'From $500',
+      price: 'Call for Quote',
     },
     {
       title: 'Chrome Delete',
       description: 'Sleek blackout for chrome trim',
-      price: 'From $200',
+      price: 'Call for Quote',
     },
     {
       title: 'Rim Restoration',
       description: 'Refinishing and color matching',
-      price: 'From $80/wheel',
+      price: 'Call for Quote',
+    },
+    {
+      title: 'Glass Replacement',
+      description: 'Professional auto glass services',
+      price: 'Call for Quote',
+    },
+    {
+      title: 'Caliper Painting',
+      description: 'Custom brake caliper colors',
+      price: 'Call for Quote',
     },
   ];
 
   const pricingTiers = [
-    { name: 'Carbon Film', items: [
-      { service: '2 Front Windows', price: '$100' },
-      { service: 'All Around', price: '$240' },
-      { service: 'Full Vehicle + Windshield', price: '$340' },
+    { name: 'Carbon Film', warranty: '5-Year Warranty', items: [
+      { service: 'Two Front Windows', price: 'From $100' },
+      { service: 'All Around', price: 'From $240' },
+      { service: 'Windshield (Sedan)', price: 'From $140' },
+      { service: 'Windshield (SUV/Pickup)', price: 'From $150' },
     ]},
-    { name: 'Ceramic Film', items: [
-      { service: '2 Front Windows', price: '$150' },
-      { service: 'All Around', price: '$340' },
-      { service: 'Full Vehicle + Windshield', price: '$490' },
+    { name: 'Ceramic Film', warranty: 'Lifetime Warranty', items: [
+      { service: 'Two Front Windows', price: 'From $150' },
+      { service: 'All Around', price: 'From $340' },
+      { service: 'Windshield (Sedan)', price: 'From $200' },
+      { service: 'Windshield (SUV/Pickup)', price: 'From $220' },
     ]},
+  ];
+
+  const addOnServices = [
+    { service: 'Tint Removal (All Around)', price: 'From $120' },
+    { service: 'Windshield Tint Removal', price: '$100' },
+    { service: 'Single Window Removal', price: '$15' },
+    { service: 'Adhesive Removal', price: '$15/door or $120 all' },
+    { service: 'Sun Strip (6")', price: '$40' },
+    { service: 'Door Cup Guard', price: '$40/pair' },
+    { service: 'Edge Guard (PPF)', price: '$15/door' },
+    { service: 'Sun/Moon Roof (Carbon)', price: 'From $60' },
+    { service: 'Sun/Moon Roof (Ceramic)', price: 'From $90' },
+  ];
+
+  const products = [
+    { name: 'Plate Covers', price: '$15 each' },
+    { name: 'License Plate Frame', price: '$10' },
+    { name: 'Broadway Rearview Mirror', price: '$20' },
+    { name: 'Glass Cleaner', price: '$15 (2 for $25)' },
+    { name: 'Key Fob Covers', price: 'From $10' },
+    { name: 'LED Visor Mirror', price: '$20' },
+    { name: 'Car Air Fresheners', price: '$2 each' },
   ];
 
   return (
@@ -95,19 +129,20 @@ function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-black border-t border-zamu-gray-dark">
+      <section className="py-20 bg-black" style={{ borderTop: '1px solid #333' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="text-center p-8 border border-zamu-gray-dark hover:border-zamu-cyan transition-colors"
+                className="text-center p-8 transition-colors"
+                style={{ border: '1px solid #333' }}
               >
                 <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                  <feature.icon className="w-10 h-10 text-zamu-cyan" />
+                  <feature.icon className="w-10 h-10" style={{ color: '#36B9EB' }} />
                 </div>
                 <h3 className="text-xl font-display font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-zamu-gray-medium font-serif">{feature.description}</p>
+                <p style={{ color: '#919191' }} className="font-serif">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -115,26 +150,27 @@ function Home() {
       </section>
 
       {/* Services Preview */}
-      <section className="py-20 bg-zamu-gray-dark">
+      <section className="py-20" style={{ backgroundColor: '#1B1B1B' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">OUR SERVICES</h2>
-            <p className="text-zamu-gray-medium text-xl font-serif">
+            <p style={{ color: '#919191' }} className="text-xl font-serif">
               Comprehensive auto customization services to make your vehicle stand out
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => (
               <div
                 key={index}
-                className="bg-black border border-zamu-gray-dark p-8 hover:border-zamu-cyan transition-all group"
+                className="bg-black p-8 transition-all"
+                style={{ border: '1px solid #333' }}
               >
-                <h3 className="text-xl font-display font-semibold text-white mb-3 group-hover:text-zamu-cyan transition-colors">
+                <h3 className="text-xl font-display font-semibold text-white mb-3">
                   {service.title}
                 </h3>
-                <p className="text-zamu-gray-medium font-serif mb-4">{service.description}</p>
-                <p className="text-zamu-cyan font-display font-bold text-xl">{service.price}</p>
+                <p style={{ color: '#919191' }} className="font-serif mb-4">{service.description}</p>
+                <p style={{ color: '#36B9EB' }} className="font-display font-bold text-xl">{service.price}</p>
               </div>
             ))}
           </div>
@@ -152,7 +188,7 @@ function Home() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">WINDOW TINTING</h2>
-            <p className="text-zamu-gray-medium text-xl font-serif">
+            <p style={{ color: '#919191' }} className="text-xl font-serif">
               Professional installation with premium films
             </p>
           </div>
@@ -161,17 +197,18 @@ function Home() {
             {pricingTiers.map((tier, index) => (
               <div
                 key={index}
-                className={`border p-8 ${index === 1 ? 'border-zamu-cyan' : 'border-zamu-gray-dark'}`}
+                className="p-8"
+                style={{ border: index === 1 ? '2px solid #36B9EB' : '1px solid #333' }}
               >
                 <h3 className="text-2xl font-display font-bold text-white mb-2">{tier.name}</h3>
-                <p className="text-zamu-gray-medium font-serif mb-6">
-                  {index === 0 ? '5-Year Warranty' : 'Lifetime Warranty'}
+                <p style={{ color: '#919191' }} className="font-serif mb-6">
+                  {tier.warranty}
                 </p>
                 <ul className="space-y-4">
                   {tier.items.map((item, i) => (
-                    <li key={i} className="flex justify-between items-center py-3 border-b border-zamu-gray-dark last:border-0">
+                    <li key={i} className="flex justify-between items-center py-3" style={{ borderBottom: '1px solid #333' }}>
                       <span className="text-white font-serif">{item.service}</span>
-                      <span className="text-zamu-cyan font-display font-bold text-xl">{item.price}</span>
+                      <span style={{ color: '#36B9EB' }} className="font-display font-bold text-lg">{item.price}</span>
                     </li>
                   ))}
                 </ul>
@@ -179,8 +216,8 @@ function Home() {
                   to={`/book?service=${index + 1}`}
                   className="block mt-8 text-center py-4 font-display font-semibold transition-colors"
                   style={index === 1
-                    ? { backgroundColor: 'var(--zamu-cyan)', color: 'black' }
-                    : { border: '1px solid var(--zamu-cyan)', color: 'var(--zamu-cyan)' }
+                    ? { backgroundColor: '#36B9EB', color: 'black' }
+                    : { border: '1px solid #36B9EB', color: '#36B9EB' }
                   }
                 >
                   Book {tier.name}
@@ -191,8 +228,38 @@ function Home() {
         </div>
       </section>
 
+      {/* Add-on Services */}
+      <section className="py-16" style={{ backgroundColor: '#1B1B1B' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-display font-bold text-white text-center mb-10">ADD-ON SERVICES</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {addOnServices.map((item, index) => (
+              <div key={index} className="flex justify-between items-center p-4" style={{ backgroundColor: 'black', border: '1px solid #333' }}>
+                <span className="text-white font-serif">{item.service}</span>
+                <span style={{ color: '#36B9EB' }} className="font-display font-bold">{item.price}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Products */}
+      <section className="py-16 bg-black">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-display font-bold text-white text-center mb-10">PRODUCTS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {products.map((item, index) => (
+              <div key={index} className="text-center p-4" style={{ backgroundColor: '#1B1B1B', border: '1px solid #333' }}>
+                <p className="text-white font-serif mb-2">{item.name}</p>
+                <p style={{ color: '#36B9EB' }} className="font-display font-bold">{item.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-24 bg-zamu-cyan">
+      <section className="py-24" style={{ backgroundColor: '#36B9EB' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-5xl font-display font-bold text-black mb-6">
             READY TO TRANSFORM YOUR VEHICLE?

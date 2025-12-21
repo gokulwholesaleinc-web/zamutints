@@ -129,17 +129,19 @@ async function initDatabase() {
       ) AS v(name, description, category, base_price, duration_minutes)
       WHERE NOT EXISTS (SELECT 1 FROM services LIMIT 1);
 
-      -- Seed service variants if empty
+      -- Seed service variants if empty (pricing from zamutints.com)
       INSERT INTO service_variants (service_id, name, price, duration_minutes, description)
       SELECT sv.* FROM (
         SELECT s.id, v.name, v.price, v.duration, v.descr FROM services s
         CROSS JOIN (VALUES
-          ('Carbon Film Tint', '2 Front Windows', 100.00, 45, 'Driver and passenger front windows'),
+          ('Carbon Film Tint', 'Two Front Windows', 100.00, 45, 'Driver and passenger front windows'),
           ('Carbon Film Tint', 'All Around', 240.00, 90, 'All windows including rear'),
-          ('Carbon Film Tint', 'Full Vehicle + Windshield', 340.00, 120, 'Complete coverage'),
-          ('Ceramic Film Tint', '2 Front Windows', 150.00, 45, 'Driver and passenger front windows'),
+          ('Carbon Film Tint', 'Windshield (Sedan)', 140.00, 60, 'Windshield tint for sedans'),
+          ('Carbon Film Tint', 'Windshield (SUV/Pickup)', 150.00, 60, 'Windshield tint for SUVs and pickups'),
+          ('Ceramic Film Tint', 'Two Front Windows', 150.00, 45, 'Driver and passenger front windows'),
           ('Ceramic Film Tint', 'All Around', 340.00, 90, 'All windows including rear'),
-          ('Ceramic Film Tint', 'Full Vehicle + Windshield', 490.00, 120, 'Complete coverage')
+          ('Ceramic Film Tint', 'Windshield (Sedan)', 200.00, 60, 'Windshield tint for sedans'),
+          ('Ceramic Film Tint', 'Windshield (SUV/Pickup)', 220.00, 60, 'Windshield tint for SUVs and pickups')
         ) AS v(service_name, name, price, duration, descr)
         WHERE s.name = v.service_name
       ) AS sv(service_id, name, price, duration_minutes, description)
