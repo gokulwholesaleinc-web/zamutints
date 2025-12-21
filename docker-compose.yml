@@ -30,12 +30,12 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
-      FRONTEND_URL: http://localhost:9001
+      FRONTEND_URL: http://localhost:9003
     volumes:
       - ./server:/app
       - /app/node_modules
     ports:
-      - "9001:3000"
+      - "9002:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -47,13 +47,13 @@ services:
       dockerfile: Dockerfile
     container_name: zamutints-client
     environment:
-      VITE_API_URL: http://localhost:9001/api
+      VITE_API_URL: http://localhost:9002/api
       VITE_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
     volumes:
       - ./client:/app
       - /app/node_modules
     ports:
-      - "9002:5173"
+      - "9003:5173"
     depends_on:
       - server
     command: npm run dev

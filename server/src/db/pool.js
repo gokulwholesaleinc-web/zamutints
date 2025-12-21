@@ -113,7 +113,7 @@ async function initDatabase() {
       -- Seed service variants if empty
       INSERT INTO service_variants (service_id, name, price, duration_minutes, description)
       SELECT sv.* FROM (
-        SELECT s.id, v.name, v.price, v.duration, v.desc FROM services s
+        SELECT s.id, v.name, v.price, v.duration, v.descr FROM services s
         CROSS JOIN (VALUES
           ('Carbon Film Tint', '2 Front Windows', 100.00, 45, 'Driver and passenger front windows'),
           ('Carbon Film Tint', 'All Around', 240.00, 90, 'All windows including rear'),
@@ -121,7 +121,7 @@ async function initDatabase() {
           ('Ceramic Film Tint', '2 Front Windows', 150.00, 45, 'Driver and passenger front windows'),
           ('Ceramic Film Tint', 'All Around', 340.00, 90, 'All windows including rear'),
           ('Ceramic Film Tint', 'Full Vehicle + Windshield', 490.00, 120, 'Complete coverage')
-        ) AS v(service_name, name, price, duration, desc)
+        ) AS v(service_name, name, price, duration, descr)
         WHERE s.name = v.service_name
       ) AS sv(service_id, name, price, duration_minutes, description)
       WHERE NOT EXISTS (SELECT 1 FROM service_variants LIMIT 1);
@@ -129,13 +129,13 @@ async function initDatabase() {
       -- Seed business hours if empty
       INSERT INTO business_hours (day_of_week, open_time, close_time, is_closed)
       SELECT * FROM (VALUES
-        (0, NULL, NULL, true),           -- Sunday closed
-        (1, '09:00', '17:00', false),    -- Monday
-        (2, '09:00', '17:00', false),    -- Tuesday
-        (3, '09:00', '17:00', false),    -- Wednesday
-        (4, '09:00', '17:00', false),    -- Thursday
-        (5, '09:00', '17:00', false),    -- Friday
-        (6, '09:00', '17:00', false)     -- Saturday
+        (0, NULL::TIME, NULL::TIME, true),
+        (1, '09:00'::TIME, '17:00'::TIME, false),
+        (2, '09:00'::TIME, '17:00'::TIME, false),
+        (3, '09:00'::TIME, '17:00'::TIME, false),
+        (4, '09:00'::TIME, '17:00'::TIME, false),
+        (5, '09:00'::TIME, '17:00'::TIME, false),
+        (6, '09:00'::TIME, '17:00'::TIME, false)
       ) AS v(day_of_week, open_time, close_time, is_closed)
       WHERE NOT EXISTS (SELECT 1 FROM business_hours LIMIT 1);
     `);
