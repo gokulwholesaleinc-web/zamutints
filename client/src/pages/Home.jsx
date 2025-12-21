@@ -177,11 +177,11 @@ function Home() {
                 </ul>
                 <Link
                   to={`/book?service=${index + 1}`}
-                  className={`block mt-8 text-center py-4 font-display font-semibold transition-colors ${
-                    index === 1
-                      ? 'bg-zamu-cyan text-black hover:bg-zamu-cyan-light'
-                      : 'border border-zamu-cyan text-zamu-cyan hover:bg-zamu-cyan hover:text-black'
-                  }`}
+                  className="block mt-8 text-center py-4 font-display font-semibold transition-colors"
+                  style={index === 1
+                    ? { backgroundColor: 'var(--zamu-cyan)', color: 'black' }
+                    : { border: '1px solid var(--zamu-cyan)', color: 'var(--zamu-cyan)' }
+                  }
                 >
                   Book {tier.name}
                 </Link>

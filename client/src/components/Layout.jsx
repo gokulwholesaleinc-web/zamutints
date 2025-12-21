@@ -150,8 +150,17 @@ function Layout() {
             </div>
           </div>
 
-          <div className="border-t border-black mt-8 pt-8 text-center text-zamu-gray-medium text-sm font-serif">
-            &copy; {new Date().getFullYear()} Zamu Tints Corp. All rights reserved.
+          <div className="border-t border-black mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-serif">
+            <span style={{ color: '#919191' }}>
+              &copy; {new Date().getFullYear()} Zamu Tints Corp. All rights reserved.
+            </span>
+            <Link
+              to="/admin"
+              style={{ color: '#919191' }}
+              className="hover:text-white transition-colors"
+            >
+              Admin Login
+            </Link>
           </div>
         </div>
       </footer>

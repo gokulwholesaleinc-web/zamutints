@@ -216,11 +216,11 @@ function Booking() {
                     {selectedService.variants.map((variant) => (
                       <label
                         key={variant.id}
-                        className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
-                          formData.variantId === variant.id.toString()
-                            ? 'border-primary-500 bg-primary-600/10'
-                            : 'border-dark-700 hover:border-dark-500'
-                        }`}
+                        className="flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors"
+                        style={formData.variantId === variant.id.toString()
+                          ? { borderColor: 'var(--zamu-cyan)', backgroundColor: 'rgba(54, 185, 235, 0.15)' }
+                          : { borderColor: '#333', backgroundColor: 'transparent' }
+                        }
                       >
                         <div className="flex items-center">
                           <input
@@ -234,11 +234,11 @@ function Booking() {
                           <div>
                             <p className="text-white font-medium">{variant.name}</p>
                             {variant.description && (
-                              <p className="text-dark-400 text-sm">{variant.description}</p>
+                              <p style={{ color: '#919191' }} className="text-sm">{variant.description}</p>
                             )}
                           </div>
                         </div>
-                        <span className="text-primary-400 font-semibold">
+                        <span style={{ color: 'var(--zamu-cyan)' }} className="font-semibold">
                           ${parseFloat(variant.price).toFixed(0)}
                         </span>
                       </label>
@@ -311,11 +311,11 @@ function Booking() {
                           onClick={() =>
                             setFormData((prev) => ({ ...prev, appointmentTime: slot.time }))
                           }
-                          className={`py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
-                            formData.appointmentTime === slot.time
-                              ? 'bg-primary-600 text-white'
-                              : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                          }`}
+                          className="py-3 px-4 rounded-lg text-sm font-medium transition-colors"
+                          style={formData.appointmentTime === slot.time
+                            ? { backgroundColor: 'var(--zamu-cyan)', color: 'black' }
+                            : { backgroundColor: '#1B1B1B', color: '#919191' }
+                          }
                         >
                           {slot.formatted}
                         </button>
