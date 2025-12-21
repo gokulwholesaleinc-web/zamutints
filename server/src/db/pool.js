@@ -95,6 +95,25 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      -- Business settings table
+      CREATE TABLE IF NOT EXISTS business_settings (
+        id SERIAL PRIMARY KEY,
+        business_name VARCHAR(255) DEFAULT 'Zamu Tints',
+        phone VARCHAR(20) DEFAULT '872-203-1857',
+        email VARCHAR(255),
+        address_line1 VARCHAR(255),
+        address_line2 VARCHAR(255),
+        city VARCHAR(100) DEFAULT 'Chicago',
+        state VARCHAR(50) DEFAULT 'IL',
+        zip VARCHAR(20),
+        logo_url VARCHAR(500),
+        instagram_url VARCHAR(255) DEFAULT 'https://instagram.com/zamutints',
+        tiktok_url VARCHAR(255),
+        deposit_amount DECIMAL(10,2) DEFAULT 35.00,
+        cancellation_policy TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       -- Seed default services if empty
       INSERT INTO services (name, description, category, base_price, duration_minutes)
       SELECT * FROM (VALUES
@@ -138,6 +157,11 @@ async function initDatabase() {
         (6, '09:00'::TIME, '17:00'::TIME, false)
       ) AS v(day_of_week, open_time, close_time, is_closed)
       WHERE NOT EXISTS (SELECT 1 FROM business_hours LIMIT 1);
+
+      -- Seed default business settings if empty
+      INSERT INTO business_settings (business_name, phone, city, state, instagram_url, deposit_amount)
+      SELECT 'Zamu Tints', '872-203-1857', 'Chicago', 'IL', 'https://instagram.com/zamutints', 35.00
+      WHERE NOT EXISTS (SELECT 1 FROM business_settings LIMIT 1);
     `);
 
     console.log('Database tables created/verified');

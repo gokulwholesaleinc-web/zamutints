@@ -4,40 +4,87 @@
 
 @layer base {
   body {
-    @apply bg-dark-950 text-white antialiased;
+    @apply bg-black text-white antialiased;
+    font-family: 'Old Standard TT', Georgia, serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Cinzel', serif;
   }
 }
 
 @layer components {
   .btn {
-    @apply px-6 py-3 font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-950;
+    @apply px-6 py-3 font-semibold rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black;
+    font-family: 'Old Standard TT', serif;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply btn bg-zamu-cyan text-black hover:bg-zamu-cyan-light focus:ring-zamu-cyan;
   }
 
   .btn-secondary {
-    @apply btn bg-dark-800 text-white hover:bg-dark-700 focus:ring-dark-500 border border-dark-600;
+    @apply btn bg-transparent text-white border border-zamu-gray-medium hover:border-zamu-cyan hover:text-zamu-cyan;
   }
 
   .btn-outline {
-    @apply btn bg-transparent text-primary-400 border-2 border-primary-400 hover:bg-primary-400 hover:text-dark-950;
+    @apply btn bg-transparent text-zamu-cyan border-2 border-zamu-cyan hover:bg-zamu-cyan hover:text-black;
   }
 
   .input {
-    @apply w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-3 bg-white border border-zamu-gray-medium rounded text-black placeholder-zamu-gray-medium focus:outline-none focus:ring-2 focus:ring-zamu-cyan focus:border-transparent;
+    font-family: 'Old Standard TT', serif;
+  }
+
+  .input-dark {
+    @apply w-full px-4 py-3 bg-zamu-gray-dark border border-zamu-gray-dark rounded text-white placeholder-zamu-gray-medium focus:outline-none focus:ring-2 focus:ring-zamu-cyan focus:border-transparent;
+    font-family: 'Old Standard TT', serif;
   }
 
   .card {
-    @apply bg-dark-900 border border-dark-800 rounded-xl p-6;
+    @apply bg-zamu-gray-dark border border-zamu-gray-dark rounded-lg p-6 shadow-zamu;
   }
 
   .section-title {
     @apply text-3xl md:text-4xl font-bold text-white mb-4;
+    font-family: 'Cinzel', serif;
   }
 
   .section-subtitle {
-    @apply text-dark-400 text-lg mb-8;
+    @apply text-zamu-gray-medium text-lg mb-8;
+    font-family: 'Old Standard TT', serif;
+  }
+
+  /* Logo text styling */
+  .logo-text {
+    font-family: 'Adamina', serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* Accent text */
+  .accent-text {
+    @apply text-zamu-cyan;
+  }
+
+  /* Link styles */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-black;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zamu-gray-dark rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zamu-gray-medium;
   }
 }

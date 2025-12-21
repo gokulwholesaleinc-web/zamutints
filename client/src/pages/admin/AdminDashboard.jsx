@@ -1,22 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, Users, Clock } from 'lucide-react';
+import { Calendar, DollarSign, Users, Clock, TrendingUp, BarChart3 } from 'lucide-react';
 import { api } from '../../utils/api';
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null);
+  const [salesReport, setSalesReport] = useState(null);
+  const [topServices, setTopServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    fetchData();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     try {
-      const data = await api.get('/admin/stats');
-      setStats(data);
+      const [statsData, salesData, servicesData] = await Promise.all([
+        api.get('/admin/stats'),
+        api.get('/admin/reports/sales').catch(() => null),
+        api.get('/admin/reports/top-services').catch(() => [])
+      ]);
+      setStats(statsData);
+      setSalesReport(salesData);
+      setTopServices(servicesData);
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
@@ -85,62 +93,121 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Sales Overview */}
+      {salesReport && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="card border-l-4 border-zamu-cyan">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-zamu-gray-medium text-sm font-serif">Total Revenue</p>
+                <p className="text-2xl font-display font-bold text-white mt-1">
+                  ${salesReport.totalRevenue?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-zamu-cyan" />
+            </div>
+          </div>
+          <div className="card border-l-4 border-green-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-zamu-gray-medium text-sm font-serif">This Month</p>
+                <p className="text-2xl font-display font-bold text-white mt-1">
+                  ${salesReport.monthRevenue?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <BarChart3 className="w-8 h-8 text-green-500" />
+            </div>
+          </div>
+          <div className="card border-l-4 border-blue-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-zamu-gray-medium text-sm font-serif">Avg Order Value</p>
+                <p className="text-2xl font-display font-bold text-white mt-1">
+                  ${salesReport.averageOrderValue?.toFixed(0) || '0'}
+                </p>
+              </div>
+              <DollarSign className="w-8 h-8 text-blue-500" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Services & Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Top Services */}
+        {topServices.length > 0 && (
+          <div className="card">
+            <h2 className="text-lg font-display font-semibold text-white mb-4">Top Services</h2>
+            <div className="space-y-3">
+              {topServices.slice(0, 5).map((service, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-zamu-gray-dark">
+                  <div>
+                    <span className="text-white font-serif">{service.serviceName}</span>
+                    <span className="text-zamu-gray-medium text-sm block">{service.bookingCount} bookings</span>
+                  </div>
+                  <span className="text-zamu-cyan font-display font-bold">${service.revenue?.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
         <div className="card">
-          <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-display font-semibold text-white mb-4">Quick Actions</h2>
           <div className="space-y-2">
             <Link
               to="/admin/bookings"
-              className="block p-3 bg-dark-800 rounded-lg hover:bg-dark-700 transition-colors"
+              className="block p-3 bg-black/50 rounded-lg border border-zamu-gray-dark hover:border-zamu-cyan transition-colors"
             >
-              <span className="text-white">View All Bookings</span>
-              <span className="text-dark-400 text-sm block">
+              <span className="text-white font-serif">View All Bookings</span>
+              <span className="text-zamu-gray-medium text-sm block">
                 Manage and update appointment status
               </span>
             </Link>
             <Link
               to="/admin/services"
-              className="block p-3 bg-dark-800 rounded-lg hover:bg-dark-700 transition-colors"
+              className="block p-3 bg-black/50 rounded-lg border border-zamu-gray-dark hover:border-zamu-cyan transition-colors"
             >
-              <span className="text-white">Manage Services</span>
-              <span className="text-dark-400 text-sm block">
+              <span className="text-white font-serif">Manage Services</span>
+              <span className="text-zamu-gray-medium text-sm block">
                 Add or edit services and pricing
               </span>
             </Link>
             <Link
               to="/admin/settings"
-              className="block p-3 bg-dark-800 rounded-lg hover:bg-dark-700 transition-colors"
+              className="block p-3 bg-black/50 rounded-lg border border-zamu-gray-dark hover:border-zamu-cyan transition-colors"
             >
-              <span className="text-white">Business Settings</span>
-              <span className="text-dark-400 text-sm block">
+              <span className="text-white font-serif">Business Settings</span>
+              <span className="text-zamu-gray-medium text-sm block">
                 Update hours and block dates
               </span>
             </Link>
           </div>
         </div>
+      </div>
 
-        <div className="card">
-          <h2 className="text-lg font-semibold text-white mb-4">System Status</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
-              <span className="text-dark-300">API Server</span>
-              <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                Online
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
-              <span className="text-dark-300">Database</span>
-              <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                Connected
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
-              <span className="text-dark-300">Stripe Payments</span>
-              <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                Active
-              </span>
-            </div>
+      {/* System Status */}
+      <div className="card">
+        <h2 className="text-lg font-display font-semibold text-white mb-4">System Status</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-zamu-gray-dark">
+            <span className="text-zamu-gray-medium font-serif">API Server</span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-display">
+              Online
+            </span>
+          </div>
+          <div className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-zamu-gray-dark">
+            <span className="text-zamu-gray-medium font-serif">Database</span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-display">
+              Connected
+            </span>
+          </div>
+          <div className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-zamu-gray-dark">
+            <span className="text-zamu-gray-medium font-serif">Stripe Payments</span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-display">
+              Active
+            </span>
           </div>
         </div>
       </div>

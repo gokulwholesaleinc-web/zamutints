@@ -7,34 +7,50 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+        // Zamutints brand colors
+        zamu: {
+          cyan: '#36B9EB',        // Primary accent blue rgb(54, 185, 235)
+          'cyan-light': '#62CAFA', // Hover state rgb(98, 202, 250)
+          'cyan-dark': '#2A9BC9',  // Darker accent
+          black: '#000000',        // Primary background
+          'gray-dark': '#1B1B1B',  // Dark gray borders rgb(27, 27, 27)
+          'gray-medium': '#919191', // Medium gray rgb(145, 145, 145)
+          'gray-light': '#F7F7F7', // Light gray rgb(247, 247, 247)
+          white: '#FFFFFF',
         },
+        // Alias dark colors for component compatibility
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
-        }
+          300: '#919191',
+          400: '#6B6B6B',
+          500: '#4A4A4A',
+          600: '#333333',
+          700: '#262626',
+          800: '#1B1B1B',
+          900: '#0D0D0D',
+        },
+        primary: {
+          50: '#E8F8FD',
+          100: '#D1F1FB',
+          200: '#A3E3F7',
+          300: '#75D5F3',
+          400: '#62CAFA',
+          500: '#36B9EB',
+          600: '#2A9BC9',
+          700: '#1F7DA7',
+          800: '#145F85',
+          900: '#0A4163',
+        },
       },
       fontFamily: {
+        // Zamutints fonts
+        serif: ['"Old Standard TT"', 'Georgia', 'serif'],
+        display: ['Cinzel', 'serif'],
+        accent: ['Adamina', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'zamu': '0 2px 6px rgba(0, 0, 0, 0.3)',
+        'zamu-lg': '0 4px 12px rgba(0, 0, 0, 0.4)',
       },
     },
   },

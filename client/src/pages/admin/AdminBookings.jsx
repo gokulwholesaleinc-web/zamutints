@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Search, Filter, ChevronDown } from 'lucide-react';
+import { Search, Filter, ChevronDown, FileText } from 'lucide-react';
 import { api } from '../../utils/api';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 function AdminBookings() {
   const [bookings, setBookings] = useState([]);
@@ -46,6 +48,32 @@ function AdminBookings() {
     } catch (error) {
       console.error('Failed to update status:', error);
       alert('Failed to update booking status');
+    }
+  };
+
+  const downloadInvoice = async (bookingId) => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch(`${API_URL}/invoices/${bookingId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to download invoice');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${bookingId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to download invoice:', error);
+      alert('Failed to download invoice');
     }
   };
 
@@ -211,18 +239,27 @@ function AdminBookings() {
                     </td>
                     <td className="px-4 py-4">{getStatusBadge(booking.status)}</td>
                     <td className="px-4 py-4">
-                      <select
-                        value={booking.status}
-                        onChange={(e) => updateStatus(booking.id, e.target.value)}
-                        className="input text-sm py-1 px-2"
-                      >
-                        <option value="pending_deposit">Pending Deposit</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="paid">Paid</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="no_show">No Show</option>
-                      </select>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={booking.status}
+                          onChange={(e) => updateStatus(booking.id, e.target.value)}
+                          className="input text-sm py-1 px-2"
+                        >
+                          <option value="pending_deposit">Pending Deposit</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="paid">Paid</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                          <option value="no_show">No Show</option>
+                        </select>
+                        <button
+                          onClick={() => downloadInvoice(booking.id)}
+                          className="p-2 text-zamu-cyan hover:text-zamu-cyan-light hover:bg-zamu-gray-dark rounded transition-colors"
+                          title="Download Invoice"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

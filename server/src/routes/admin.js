@@ -313,6 +313,109 @@ router.put('/business-hours/:dayOfWeek', async (req, res) => {
   }
 });
 
+// Get business settings
+router.get('/business-settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM business_settings LIMIT 1');
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Business settings not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching business settings:', err);
+    res.status(500).json({ error: 'Failed to fetch business settings' });
+  }
+});
+
+// Update business settings (super_admin only)
+router.put('/business-settings',
+  requireRole('super_admin'),
+  [
+    body('businessName').optional().trim().isLength({ max: 255 }),
+    body('phone').optional().trim().isLength({ max: 20 }),
+    body('email').optional().isEmail().normalizeEmail(),
+    body('addressLine1').optional().trim().isLength({ max: 255 }),
+    body('addressLine2').optional().trim().isLength({ max: 255 }),
+    body('city').optional().trim().isLength({ max: 100 }),
+    body('state').optional().trim().isLength({ max: 50 }),
+    body('zip').optional().trim().isLength({ max: 20 }),
+    body('logoUrl').optional().trim().isLength({ max: 500 }),
+    body('instagramUrl').optional().trim().isLength({ max: 255 }),
+    body('tiktokUrl').optional().trim().isLength({ max: 255 }),
+    body('depositAmount').optional().isFloat({ min: 0 }),
+    body('cancellationPolicy').optional().trim()
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const {
+        businessName,
+        phone,
+        email,
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        zip,
+        logoUrl,
+        instagramUrl,
+        tiktokUrl,
+        depositAmount,
+        cancellationPolicy
+      } = req.body;
+
+      const result = await pool.query(`
+        UPDATE business_settings SET
+          business_name = COALESCE($1, business_name),
+          phone = COALESCE($2, phone),
+          email = COALESCE($3, email),
+          address_line1 = COALESCE($4, address_line1),
+          address_line2 = COALESCE($5, address_line2),
+          city = COALESCE($6, city),
+          state = COALESCE($7, state),
+          zip = COALESCE($8, zip),
+          logo_url = COALESCE($9, logo_url),
+          instagram_url = COALESCE($10, instagram_url),
+          tiktok_url = COALESCE($11, tiktok_url),
+          deposit_amount = COALESCE($12, deposit_amount),
+          cancellation_policy = COALESCE($13, cancellation_policy),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = (SELECT id FROM business_settings LIMIT 1)
+        RETURNING *
+      `, [
+        businessName,
+        phone,
+        email,
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        zip,
+        logoUrl,
+        instagramUrl,
+        tiktokUrl,
+        depositAmount,
+        cancellationPolicy
+      ]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Business settings not found' });
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error('Error updating business settings:', err);
+      res.status(500).json({ error: 'Failed to update business settings' });
+    }
+  }
+);
+
 // Revenue report
 router.get('/reports/revenue', async (req, res) => {
   try {
@@ -341,6 +444,162 @@ router.get('/reports/revenue', async (req, res) => {
   } catch (err) {
     console.error('Error fetching revenue report:', err);
     res.status(500).json({ error: 'Failed to fetch revenue report' });
+  }
+});
+
+// Sales summary report
+router.get('/reports/sales', async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const result = await pool.query(`
+      SELECT
+        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'succeeded') as total_revenue,
+        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'succeeded' AND created_at >= $1) as month_revenue,
+        (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'succeeded' AND created_at >= $2) as week_revenue,
+        (SELECT COUNT(*) FROM bookings WHERE status IN ('completed', 'paid')) as completed_bookings
+    `, [startOfMonth.toISOString(), startOfWeek.toISOString()]);
+
+    const stats = result.rows[0];
+
+    // Calculate average order value
+    const avgResult = await pool.query(`
+      SELECT COALESCE(AVG(total_paid), 0) as avg_order_value
+      FROM (
+        SELECT b.id, SUM(p.amount) as total_paid
+        FROM bookings b
+        JOIN payments p ON b.id = p.booking_id
+        WHERE p.status = 'succeeded' AND b.status IN ('completed', 'paid')
+        GROUP BY b.id
+      ) as booking_totals
+    `);
+
+    // Revenue by service category
+    const categoryResult = await pool.query(`
+      SELECT
+        s.category,
+        COALESCE(SUM(p.amount), 0) as revenue,
+        COUNT(DISTINCT b.id) as booking_count
+      FROM services s
+      JOIN service_variants sv ON s.id = sv.service_id
+      JOIN bookings b ON sv.id = b.service_variant_id
+      JOIN payments p ON b.id = p.booking_id
+      WHERE p.status = 'succeeded'
+      GROUP BY s.category
+      ORDER BY revenue DESC
+    `);
+
+    res.json({
+      totalRevenue: parseFloat(stats.total_revenue),
+      monthRevenue: parseFloat(stats.month_revenue),
+      weekRevenue: parseFloat(stats.week_revenue),
+      completedBookings: parseInt(stats.completed_bookings),
+      averageOrderValue: parseFloat(avgResult.rows[0].avg_order_value),
+      revenueByCategory: categoryResult.rows.map(row => ({
+        category: row.category,
+        revenue: parseFloat(row.revenue),
+        bookingCount: parseInt(row.booking_count)
+      }))
+    });
+  } catch (err) {
+    console.error('Error fetching sales report:', err);
+    res.status(500).json({ error: 'Failed to fetch sales report' });
+  }
+});
+
+// Daily sales breakdown
+router.get('/reports/sales-by-date', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: 'startDate and endDate are required' });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        DATE(p.created_at) as date,
+        COALESCE(SUM(p.amount), 0) as revenue,
+        COUNT(DISTINCT b.id) as booking_count
+      FROM payments p
+      JOIN bookings b ON p.booking_id = b.id
+      WHERE p.status = 'succeeded'
+        AND DATE(p.created_at) >= $1
+        AND DATE(p.created_at) <= $2
+      GROUP BY DATE(p.created_at)
+      ORDER BY date ASC
+    `, [startDate, endDate]);
+
+    res.json(result.rows.map(row => ({
+      date: row.date,
+      revenue: parseFloat(row.revenue),
+      bookingCount: parseInt(row.booking_count)
+    })));
+  } catch (err) {
+    console.error('Error fetching sales by date:', err);
+    res.status(500).json({ error: 'Failed to fetch sales by date' });
+  }
+});
+
+// Top services by popularity
+router.get('/reports/top-services', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        s.name as service_name,
+        COUNT(DISTINCT b.id) as booking_count,
+        COALESCE(SUM(p.amount), 0) as revenue
+      FROM services s
+      JOIN service_variants sv ON s.id = sv.service_id
+      JOIN bookings b ON sv.id = b.service_variant_id
+      LEFT JOIN payments p ON b.id = p.booking_id AND p.status = 'succeeded'
+      GROUP BY s.id, s.name
+      ORDER BY booking_count DESC, revenue DESC
+      LIMIT 10
+    `);
+
+    res.json(result.rows.map(row => ({
+      serviceName: row.service_name,
+      bookingCount: parseInt(row.booking_count),
+      revenue: parseFloat(row.revenue)
+    })));
+  } catch (err) {
+    console.error('Error fetching top services:', err);
+    res.status(500).json({ error: 'Failed to fetch top services' });
+  }
+});
+
+// Top customers
+router.get('/reports/top-customers', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        c.first_name || ' ' || c.last_name as customer_name,
+        c.email,
+        COALESCE(SUM(p.amount), 0) as total_spent,
+        COUNT(DISTINCT b.id) as booking_count
+      FROM customers c
+      JOIN bookings b ON c.id = b.customer_id
+      LEFT JOIN payments p ON b.id = p.booking_id AND p.status = 'succeeded'
+      GROUP BY c.id, c.first_name, c.last_name, c.email
+      ORDER BY total_spent DESC, booking_count DESC
+      LIMIT 10
+    `);
+
+    res.json(result.rows.map(row => ({
+      customerName: row.customer_name,
+      email: row.email,
+      totalSpent: parseFloat(row.total_spent),
+      bookingCount: parseInt(row.booking_count)
+    })));
+  } catch (err) {
+    console.error('Error fetching top customers:', err);
+    res.status(500).json({ error: 'Failed to fetch top customers' });
   }
 });
 

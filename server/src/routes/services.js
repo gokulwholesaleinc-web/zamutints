@@ -2,6 +2,38 @@ const express = require('express');
 const { pool } = require('../db/pool');
 const router = express.Router();
 
+// Get public business info
+router.get('/business-info', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        business_name,
+        phone,
+        email,
+        address_line1,
+        address_line2,
+        city,
+        state,
+        zip,
+        logo_url,
+        instagram_url,
+        tiktok_url,
+        deposit_amount
+      FROM business_settings
+      LIMIT 1
+    `);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Business info not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching business info:', err);
+    res.status(500).json({ error: 'Failed to fetch business info' });
+  }
+});
+
 // Get all active services with variants
 router.get('/', async (req, res) => {
   try {

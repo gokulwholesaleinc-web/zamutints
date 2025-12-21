@@ -10,6 +10,7 @@ const bookingsRoutes = require('./routes/bookings');
 const paymentsRoutes = require('./routes/payments');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const invoicesRoutes = require('./routes/invoices');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,6 +44,7 @@ app.use('/api/bookings', bookingsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/invoices', invoicesRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
