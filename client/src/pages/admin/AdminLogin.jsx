@@ -45,10 +45,10 @@ function AdminLogin() {
 
           <div>
             <label className="block text-sm font-medium text-dark-300 mb-2">
-              Email
+              Username
             </label>
             <input
-              type="email"
+              type="text"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="input"

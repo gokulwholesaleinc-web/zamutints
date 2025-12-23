@@ -10,6 +10,7 @@ function Layout() {
     { name: 'Home', href: '/' },
     { name: 'Services', href: '/services' },
     { name: 'Book Now', href: '/book' },
+    { name: 'Admin', href: '/admin' },
   ];
 
   return (
