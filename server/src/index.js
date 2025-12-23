@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 const { pool, initDatabase } = require('./db/pool');
 
 // Routes
@@ -21,10 +22,13 @@ const notificationsRoutes = require('./routes/notifications');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for rate limiting behind Replit's proxy
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:9002',
+  origin: true,
   credentials: true
 }));
 
@@ -57,6 +61,18 @@ app.use('/api/admin/finance', financeRoutes);
 app.use('/api/admin/customers', customersRoutes);
 app.use('/api/admin/inventory', inventoryRoutes);
 app.use('/api/admin/notifications', notificationsRoutes);
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 // Error handling
 app.use((err, req, res, next) => {
