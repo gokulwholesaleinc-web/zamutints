@@ -18,7 +18,18 @@ async function initLicense() {
   // Skip license check in development if no key provided
   if (process.env.NODE_ENV === 'development' && !licenseKey) {
     console.log('[License] Running in development mode without license');
+    console.log('[License] Admin pages will prompt for license activation');
     licenseValid = true;
+    licenseDetails = {
+      type: 'development',
+      status: 'development',
+      features: ['all'],
+      maxActivations: 1,
+      currentActivations: 1,
+      expiresAt: null,
+      activatedAt: new Date().toISOString(),
+      mode: 'development'
+    };
     return { valid: true, mode: 'development' };
   }
 

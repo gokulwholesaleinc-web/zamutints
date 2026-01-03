@@ -25,6 +25,7 @@ function LicenseInfo() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active': return 'text-green-400';
+      case 'development': return 'text-blue-400';
       case 'expired': return 'text-red-400';
       case 'suspended': return 'text-yellow-400';
       default: return 'text-dark-400';
@@ -34,6 +35,7 @@ function LicenseInfo() {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'active': return <CheckCircle className="w-5 h-5 text-green-400" />;
+      case 'development': return <Shield className="w-5 h-5 text-blue-400" />;
       case 'expired': return <XCircle className="w-5 h-5 text-red-400" />;
       case 'suspended': return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
       default: return <Shield className="w-5 h-5 text-dark-400" />;
@@ -75,6 +77,33 @@ function LicenseInfo() {
         <div className="text-center py-8">
           <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <p className="text-red-400">{error}</p>
+          <p className="text-dark-500 text-sm mt-2">
+            Please activate a license key using the form on the right.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle pending/unactivated license state
+  if (!license?.status || license?.status === 'pending') {
+    return (
+      <div className="card">
+        <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
+          <Shield className="w-5 h-5 mr-2 text-primary-400" />
+          License Information
+        </h2>
+        <div className="text-center py-8">
+          <AlertTriangle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+          <p className="text-yellow-400 font-semibold">No Active License</p>
+          <p className="text-dark-400 text-sm mt-2">
+            {license?.message || 'Please enter a valid license key to activate this software.'}
+          </p>
+          {license?.storedKey && (
+            <p className="text-dark-500 text-xs mt-4 font-mono">
+              Stored key: {license.storedKey}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -86,6 +115,16 @@ function LicenseInfo() {
         <Shield className="w-5 h-5 mr-2 text-primary-400" />
         License Information
       </h2>
+
+      {/* Development Mode Banner */}
+      {license?.mode === 'development' && (
+        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <p className="text-blue-400 text-sm font-medium">Development Mode</p>
+          <p className="text-blue-300 text-xs mt-1">
+            Running without a license key. Activate a license for production use.
+          </p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {/* Status */}

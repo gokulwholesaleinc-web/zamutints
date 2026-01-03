@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { pool, initDatabase } = require('./db/pool');
-const { initLicense, requireLicense, shutdownLicense, getLicenseStatus, getLicenseDetails } = require('./middleware/license');
+const { initLicense, shutdownLicense, getLicenseStatus } = require('./middleware/license');
 
 // Routes
 const servicesRoutes = require('./routes/services');
@@ -58,15 +58,8 @@ app.get('/api/license-status', (req, res) => {
   });
 });
 
-// License details (for admin UI - requires auth)
-const { authenticateToken, requireRole } = require('./middleware/auth');
-app.get('/api/admin/license', authenticateToken, requireRole('admin'), (req, res) => {
-  const details = getLicenseDetails();
-  if (!details) {
-    return res.status(404).json({ error: 'No license information available' });
-  }
-  res.json(details);
-});
+// Note: License details endpoint is handled in admin routes (server/src/routes/admin.js)
+// That endpoint also includes stored license key from database for complete info
 
 // API Routes
 app.use('/api/services', servicesRoutes);
