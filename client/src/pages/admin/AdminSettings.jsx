@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, Plus, X } from 'lucide-react';
 import { api } from '../../utils/api';
+import LicenseInfo from '../../components/LicenseInfo';
+import LicenseActivation from '../../components/LicenseActivation';
 
 function AdminSettings() {
   const [businessHours, setBusinessHours] = useState([]);
@@ -225,6 +227,19 @@ function AdminSettings() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* License Section */}
+        <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LicenseInfo />
+            <LicenseActivation
+              onSuccess={() => {
+                // Refresh the page to show updated license info
+                window.location.reload();
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

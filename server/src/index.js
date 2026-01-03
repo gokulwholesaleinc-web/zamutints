@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { pool, initDatabase } = require('./db/pool');
+const { initLicense, requireLicense, shutdownLicense, getLicenseStatus, getLicenseDetails } = require('./middleware/license');
 
 // Routes
 const servicesRoutes = require('./routes/services');
@@ -48,6 +49,25 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// License status (for diagnostics)
+app.get('/api/license-status', (req, res) => {
+  const status = getLicenseStatus();
+  res.json({
+    licensed: status.valid,
+    error: process.env.NODE_ENV === 'development' ? status.error : undefined
+  });
+});
+
+// License details (for admin UI - requires auth)
+const { authenticateToken, requireRole } = require('./middleware/auth');
+app.get('/api/admin/license', authenticateToken, requireRole('admin'), (req, res) => {
+  const details = getLicenseDetails();
+  if (!details) {
+    return res.status(404).json({ error: 'No license information available' });
+  }
+  res.json(details);
+});
+
 // API Routes
 app.use('/api/services', servicesRoutes);
 app.use('/api/bookings', bookingsRoutes);
@@ -83,11 +103,35 @@ app.use((err, req, res, next) => {
 // Initialize database and start server
 async function start() {
   try {
+    // Initialize license first
+    try {
+      await initLicense();
+    } catch (err) {
+      console.error('[License] Validation failed:', err.message);
+      if (process.env.NODE_ENV !== 'development') {
+        console.error('Server cannot start without a valid license');
+        process.exit(1);
+      }
+    }
+
     await initDatabase();
     console.log('Database initialized');
 
-    app.listen(PORT, '0.0.0.0', () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received, shutting down gracefully...');
+      await shutdownLicense();
+      server.close(() => process.exit(0));
+    });
+
+    process.on('SIGINT', async () => {
+      console.log('SIGINT received, shutting down gracefully...');
+      await shutdownLicense();
+      server.close(() => process.exit(0));
     });
   } catch (err) {
     console.error('Failed to start server:', err);

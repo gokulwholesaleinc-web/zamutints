@@ -111,8 +111,22 @@ async function initDatabase() {
         tiktok_url VARCHAR(255),
         deposit_amount DECIMAL(10,2) DEFAULT 35.00,
         cancellation_policy TEXT,
+        license_key VARCHAR(50),
+        license_status VARCHAR(50) DEFAULT 'pending',
+        license_activated_at TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      -- Add license columns if they don't exist
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                       WHERE table_name='business_settings' AND column_name='license_key') THEN
+          ALTER TABLE business_settings ADD COLUMN license_key VARCHAR(50);
+          ALTER TABLE business_settings ADD COLUMN license_status VARCHAR(50) DEFAULT 'pending';
+          ALTER TABLE business_settings ADD COLUMN license_activated_at TIMESTAMP;
+        END IF;
+      END $$;
 
       -- Seed default services if empty
       INSERT INTO services (name, description, category, base_price, duration_minutes)

@@ -2,10 +2,96 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../db/pool');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { getLicenseDetails, activateLicenseKey } = require('../middleware/license');
 const router = express.Router();
 
 // All admin routes require authentication
 router.use(authenticateToken);
+
+// ========== LICENSE MANAGEMENT ==========
+
+// Get current license info
+router.get('/license', async (req, res) => {
+  try {
+    const licenseDetails = getLicenseDetails();
+
+    // Also get stored license from database
+    const dbResult = await pool.query(
+      'SELECT license_key, license_status, license_activated_at FROM business_settings LIMIT 1'
+    );
+    const storedLicense = dbResult.rows[0] || {};
+
+    if (!licenseDetails) {
+      return res.json({
+        status: storedLicense.license_status || 'pending',
+        message: 'License not activated',
+        storedKey: storedLicense.license_key ?
+          storedLicense.license_key.replace(/^(.{4}).+(.{4})$/, '$1-****-****-$2') : null
+      });
+    }
+
+    res.json({
+      ...licenseDetails,
+      storedKey: storedLicense.license_key ?
+        storedLicense.license_key.replace(/^(.{4}).+(.{4})$/, '$1-****-****-$2') : null
+    });
+  } catch (err) {
+    console.error('Error fetching license:', err);
+    res.status(500).json({ error: 'Failed to fetch license info' });
+  }
+});
+
+// Activate a new license key
+router.post('/license/activate',
+  [body('licenseKey').notEmpty().trim().isLength({ min: 19, max: 19 })],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid license key format. Expected: XXXX-XXXX-XXXX-XXXX'
+      });
+    }
+
+    try {
+      const { licenseKey } = req.body;
+
+      // Try to activate with the license server
+      const result = await activateLicenseKey(licenseKey);
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.error || 'License activation failed'
+        });
+      }
+
+      // Store the license key in the database
+      await pool.query(`
+        UPDATE business_settings SET
+          license_key = $1,
+          license_status = 'active',
+          license_activated_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = (SELECT id FROM business_settings LIMIT 1)
+      `, [licenseKey]);
+
+      res.json({
+        success: true,
+        license: result.license,
+        message: 'License activated successfully'
+      });
+    } catch (err) {
+      console.error('Error activating license:', err);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate license'
+      });
+    }
+  }
+);
+
+// ========== END LICENSE MANAGEMENT ==========
 
 // Dashboard stats
 router.get('/stats', async (req, res) => {
